@@ -24,7 +24,7 @@ pipeline {
             steps {
                 sshagent (credentials: ['ssh-nginx']) { // <-- ID кредов для доступа к nginx
                     sh '''
-                        rsync -avz index.html root@192.168.100.4:/var/www/html/index.html
+                        rsync -avz -e "ssh -o StrictHostKeyChecking=no" index.html root@192.168.100.4:/var/www/html/index.html
                     '''
                 }
             }
