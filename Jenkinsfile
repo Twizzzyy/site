@@ -1,26 +1,33 @@
-pipeline{
+pipeline {
     agent any
-        stages{
-            stage("Take index"){
-                steps{
-                    git branch: "main",
-                    url: "git@github.com:Twizzzyy/site.git"
-                    credentialsId: "~/.ssh/id_ed25519_github"
-                }    
+
+    stages {
+        stage('Take index') {
+            steps {
+                echo 'Клонируем репозиторий с GitHub'
+                git branch: 'main',
+                    url: 'git@github.com:Twizzzyy/site.git',
+                    credentialsId: 'github2'    // <-- ID кредов из Jenkins
             }
-            stage("Show git directory"){
-                steps{
+        }
+
+        stage('Show git directory') {
+            steps {
+                sh '''
+                    pwd
+                    ls -la
+                '''
+            }
+        }
+
+        stage('clone to nginx') {
+            steps {
+                sshagent (credentials: ['ssh-nginx']) { // <-- ID кредов для доступа к nginx
                     sh '''
-                        ls -la
+                        rsync -avz index.html root@192.168.100.4:/var/www/html/index.html
                     '''
                 }
             }
-            stage("clone to nginx"){
-                steps{
-                    sshagent (credentials: ['~/.ssh/ed25519_deploy']){
-                        rsync -avz index.html root@192.168.100.4:/var/www/html/index.html
-                    }
-                }
-            }
         }
+    }
 }
